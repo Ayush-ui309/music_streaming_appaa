@@ -1,0 +1,311 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --bg-color: #0b110d;
+  --bg-surface: #131f18;
+  --bg-surface-light: #1c2c22;
+  --bg-hover: #213529;
+  --bg-skeleton: #1a241f;
+  --text-primary: #ffffff;
+  --text-secondary: #8b9d93;
+  --primary-color: #4df478; /* Neon Green */
+  --primary-hover: #3bde65;
+  --border-color: #1f3026;
+  --error-color: #ff4d4d;
+  
+  --player-height: 80px;
+  --sidebar-width: 240px;
+  --bottom-nav-height: 64px;
+  --navbar-height: 72px;
+  --navbar-left: var(--sidebar-width);
+}
+
+[data-theme='light'] {
+  --bg-color: #f8faf9;
+  --bg-surface: #ffffff;
+  --bg-surface-light: #f0f4f2;
+  --bg-hover: #e8ecea;
+  --bg-skeleton: #e0e6e3;
+  --text-primary: #121513;
+  --text-secondary: #5a645f;
+  --border-color: rgba(0, 0, 0, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  cursor: pointer;
+  background: none;
+  border: none;
+  color: inherit;
+  outline: none;
+  font-family: inherit;
+}
+
+ul {
+  list-style: none;
+}
+
+input, textarea {
+  font-family: inherit;
+  outline: none;
+}
+
+/* Layout */
+.app-container {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--bg-color);
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  position: relative;
+  padding-bottom: calc(var(--player-height) + 20px);
+}
+
+/* Mobile adjustments handled later if needed, but we design desktop-first with mobile responsiveness */
+@media (max-width: 768px) {
+  .sidebar-container {
+    display: none !important;
+  }
+  
+  .bottom-nav-container {
+    display: flex !important;
+  }
+
+  .app-container {
+    flex-direction: column;
+  }
+  
+  .main-content {
+    padding-bottom: calc(var(--player-height) + var(--bottom-nav-height) + 40px);
+  }
+
+  :root {
+    --navbar-left: 0;
+  }
+
+  .page-container {
+    padding: 16px;
+    padding-top: calc(var(--navbar-height) + 16px);
+  }
+
+  .player-wrapper {
+    left: 8px !important;
+    right: 8px !important;
+    bottom: calc(var(--bottom-nav-height) + 8px) !important;
+  }
+
+  .player-container {
+    padding: 8px 16px !important;
+    border-radius: 12px !important;
+  }
+
+  .player-controls {
+    width: auto !important;
+  }
+}
+
+.page-container {
+  padding: 24px;
+  padding-top: calc(var(--navbar-height) + 24px);
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.1);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+/* Typography Utilities */
+.text-ellipsis {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.title-lg {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+.title-md {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.text-muted {
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+/* Base Components */
+.card {
+  background-color: var(--bg-surface);
+  border-radius: 12px;
+  padding: 16px;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  border: 1px solid var(--border-color);
+}
+
+.card:hover {
+  background-color: var(--bg-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  color: #000;
+  border-radius: 8px;
+  padding: 12px 32px;
+  font-weight: 600;
+  font-size: 15px;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-hover);
+  box-shadow: 0 0 20px rgba(77, 244, 120, 0.4);
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+.btn-secondary {
+  background-color: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 12px 32px;
+  font-weight: 600;
+  font-size: 15px;
+  transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+  border-color: var(--text-secondary);
+  background-color: rgba(255,255,255,0.05);
+}
+
+.pill-container {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+.pill {
+  padding: 8px 20px;
+  border-radius: 500px;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  transition: all 0.2s;
+}
+
+.pill.active {
+  background-color: var(--primary-color);
+  color: #000;
+  border-color: var(--primary-color);
+}
+
+.pill:hover:not(.active) {
+  background-color: var(--bg-hover);
+}
+
+.input-field {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-surface-light);
+  color: var(--text-primary);
+  font-size: 15px;
+  transition: border-color 0.2s;
+}
+
+.input-field:focus {
+  border-color: var(--primary-color);
+  background-color: var(--bg-hover);
+}
+
+.grid-system {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
+}
+
+/* Utility: spin animation for loaders */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
+.skeleton-pulse {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@media (max-width: 768px) {
+  .hide-mobile {
+    display: none !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .hide-desktop {
+    display: none !important;
+  }
+}
+
