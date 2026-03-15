@@ -9,9 +9,12 @@ export const AuthProvider = ({ children }) => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const [profileLoading, setProfileLoading] = useState(false);
+
   const refreshProfile = async (userId) => {
-    if (!userId) return;
+    if (!userId || profileLoading) return;
     console.log("[AuthContext] Refreshing profile for:", userId);
+    setProfileLoading(true);
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -22,19 +25,26 @@ export const AuthProvider = ({ children }) => {
       if (data) {
         console.log("[AuthContext] Profile fetched:", data);
         setProfile(data);
-      } else if (error && error.code === 'PGRST116') {
+      } else if (error && (error.code === 'PGRST116' || error.details?.includes('0 rows'))) {
         console.log("[AuthContext] Profile missing from DB, creating default...");
-        const { data: newData } = await supabase
+        const { data: newData, error: insertError } = await supabase
           .from('profiles')
           .insert({ id: userId, avatar: 'icon:User:#4df478' })
           .select()
           .single();
-        if (newData) setProfile(newData);
+        
+        if (insertError) {
+          console.error("[AuthContext] Error creating default profile:", insertError);
+        } else if (newData) {
+          setProfile(newData);
+        }
       } else if (error) {
         console.error("[AuthContext] Supabase error fetching profile:", error);
       }
     } catch (err) {
       console.error("[AuthContext] Unexpected error refreshing profile:", err);
+    } finally {
+      setProfileLoading(false);
     }
   };
 
@@ -72,11 +82,11 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    if (user && !profile && !loading) {
+    if (user && !profile && !loading && !profileLoading) {
       console.log("[AuthContext] User exists but no profile. Auto-fetching...");
       refreshProfile(user.id);
     }
-  }, [user, profile, loading]);
+  }, [user, profile, loading, profileLoading]);
 
   const value = {
     user,

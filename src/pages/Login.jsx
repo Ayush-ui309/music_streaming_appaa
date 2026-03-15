@@ -32,7 +32,13 @@ const Login = () => {
         setIsLogin(true);
       }
     } catch (err) {
-      setError(err.message || 'An error occurred during authentication.');
+      if (err.message?.toLowerCase().includes('rate limit')) {
+        setError('Too many requests. Please wait a few minutes before trying again.');
+      } else if (err.message?.toLowerCase().includes('signup limit')) {
+        setError('Signup limit reached for today. Please try again tomorrow or use a different network.');
+      } else {
+        setError(err.message || 'An error occurred during authentication.');
+      }
     } finally {
       setLoading(false);
     }
