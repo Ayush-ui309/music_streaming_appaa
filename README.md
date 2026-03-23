@@ -65,13 +65,6 @@ src/
    ```bash
    npm install
    ```
-
-3. **Environment Setup**:
-   Create a `.env` file in the root directory and add your credentials:
-   ```env
-   VITE_SUPABASE_URL=your_supabase_url
-   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-   VITE_JAMENDO_CLIENT_ID=your_jamendo_client_id
    ```
 
 4. **Run the application**:
