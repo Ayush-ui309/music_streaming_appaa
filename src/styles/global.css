@@ -1,17 +1,17 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 :root {
-  --bg-color: #0b110d;
-  --bg-surface: #131f18;
-  --bg-surface-light: #1c2c22;
-  --bg-hover: #213529;
-  --bg-skeleton: #1a241f;
+  --bg-color: #121212; /* Deep Black Spotify Style */
+  --bg-surface: #181818;
+  --bg-surface-light: #282828;
+  --bg-hover: #2a2a2a;
+  --bg-skeleton: #202020;
   --text-primary: #ffffff;
-  --text-secondary: #8b9d93;
-  --primary-color: #4df478; /* Neon Green */
-  --primary-hover: #3bde65;
-  --border-color: #1f3026;
-  --error-color: #ff4d4d;
+  --text-secondary: #b3b3b3;
+  --primary-color: #1ed760; /* Official Spotify Green */
+  --primary-hover: #1fdf64;
+  --border-color: rgba(255, 255, 255, 0.1);
+  --error-color: #e91429;
   
   --player-height: 80px;
   --sidebar-width: 240px;
@@ -139,17 +139,61 @@ input, textarea {
 
 /* Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 12px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.1);
-  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  border: 3px solid transparent;
+  background-clip: padding-box;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255,255,255,0.2);
+  background: rgba(255, 255, 255, 0.2);
+  border: 3px solid transparent;
+  background-clip: padding-box;
+}
+
+/* Horizontal Scroll Container */
+.horizontal-scroll-container {
+  display: flex;
+  overflow-x: auto;
+  gap: 24px;
+  padding: 8px 4px 24px 4px;
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.horizontal-scroll-container::-webkit-scrollbar {
+  display: none; /* Hide scrollbar for Chrome, Safari and Opera */
+}
+
+.horizontal-scroll-container > * {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+  width: 190px; /* Hits exactly ~6 cards on desktop */
+  margin-right: 16px;
+}
+
+@media (max-width: 1200px) {
+  .horizontal-scroll-container > * {
+    width: 170px; /* Hits ~5-6 on slightly smaller screens */
+  }
+}
+
+@media (max-width: 768px) {
+  .horizontal-scroll-container > * {
+    width: 140px; /* Hits ~2.5-3 cards on mobile */
+  }
+}
+
+.scroll-arrow:hover {
+  transform: translateY(-50%) scale(1.1) !important;
+  background-color: rgba(0, 0, 0, 0.9) !important;
 }
 
 /* Typography Utilities */
@@ -160,73 +204,65 @@ input, textarea {
 }
 
 .title-lg {
-  font-size: 28px;
+  font-size: 32px;
   font-weight: 800;
-  letter-spacing: -0.5px;
+  letter-spacing: -1.2px;
+  margin-bottom: 24px;
 }
 
 .title-md {
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 700;
-  margin-bottom: 16px;
+  letter-spacing: -0.7px;
 }
 
 .text-muted {
   color: var(--text-secondary);
   font-size: 14px;
+  font-weight: 500;
 }
 
 /* Base Components */
 .card {
-  background-color: var(--bg-surface);
-  border-radius: 12px;
-  padding: 16px;
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-  border: 1px solid var(--border-color);
+  background-color: transparent; /* Changed to transparent by default for a cleaner look */
+  border-radius: 6px;
+  padding: 12px;
+  transition: background-color 0.3s ease;
+  border: none;
+  cursor: pointer;
 }
 
 .card:hover {
   background-color: var(--bg-hover);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
 }
 
 .btn-primary {
   background-color: var(--primary-color);
   color: #000;
-  border-radius: 8px;
+  border-radius: 500px; /* Fully rounded buttons like Spotify */
   padding: 12px 32px;
-  font-weight: 600;
-  font-size: 15px;
-  transition: all 0.2s;
+  font-weight: 700;
+  font-size: 14px;
+  transition: transform 0.1s, background-color 0.2s;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  border: none;
 }
 
 .btn-primary:hover {
   background-color: var(--primary-hover);
-  box-shadow: 0 0 20px rgba(77, 244, 120, 0.4);
+  transform: scale(1.04);
 }
 
 .btn-primary:active {
   transform: scale(0.98);
 }
 
-.btn-secondary {
-  background-color: transparent;
-  color: var(--text-primary);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  padding: 12px 32px;
-  font-weight: 600;
-  font-size: 15px;
-  transition: all 0.2s;
-}
-
-.btn-secondary:hover {
-  border-color: var(--text-secondary);
-  background-color: rgba(255,255,255,0.05);
+.grid-system {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 20px;
 }
 
 .pill-container {
@@ -235,24 +271,29 @@ input, textarea {
   margin-bottom: 24px;
   overflow-x: auto;
   padding-bottom: 8px;
+  scrollbar-width: none;
+}
+
+.pill-container::-webkit-scrollbar {
+  display: none;
 }
 
 .pill {
-  padding: 8px 20px;
+  padding: 8px 24px;
   border-radius: 500px;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 700;
   white-space: nowrap;
-  background-color: var(--bg-surface);
-  border: 1px solid var(--border-color);
+  background-color: var(--bg-surface-light);
+  border: none;
   color: var(--text-primary);
   transition: all 0.2s;
+  cursor: pointer;
 }
 
 .pill.active {
-  background-color: var(--primary-color);
+  background-color: var(--text-primary);
   color: #000;
-  border-color: var(--primary-color);
 }
 
 .pill:hover:not(.active) {
@@ -275,16 +316,14 @@ input, textarea {
   background-color: var(--bg-hover);
 }
 
-.grid-system {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 16px;
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-/* Utility: spin animation for loaders */
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
+.fade-in {
+  animation: fadeIn 0.6s ease-out forwards;
 }
 
 @keyframes pulse {
@@ -298,6 +337,14 @@ input, textarea {
 }
 
 @media (max-width: 768px) {
+  .horizontal-scroll-container > * {
+    width: 140px; /* Smaller on mobile to fit 2-3 */
+  }
+  
+  .scroll-arrow {
+    display: none !important; /* Hide arrows on touch devices */
+  }
+
   .hide-mobile {
     display: none !important;
   }
@@ -307,5 +354,28 @@ input, textarea {
   .hide-desktop {
     display: none !important;
   }
+}
+
+/* Custom Scrollbar for Dropdowns */
+.scrollbar-custom {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+.scrollbar-custom::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-custom::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-custom::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+}
+
+.scrollbar-custom::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
 }
 

@@ -2,18 +2,28 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../utils/constants';
 
+const PLAYLIST_GRADIENTS = [
+  'linear-gradient(135deg, #450af5 0%, #c4efd9 100%)',
+  'linear-gradient(135deg, #f50a45 0%, #d9efc4 100%)',
+  'linear-gradient(135deg, #0af545 0%, #c4d9ef 100%)',
+  'linear-gradient(135deg, #f5a50a 0%, #efc4d9 100%)',
+  'linear-gradient(135deg, #0ac4f5 0%, #efd9c4 100%)',
+];
+
 const PlaylistCard = ({ playlist }) => {
   const navigate = useNavigate();
+  // Use playlist ID to consistently pick a gradient
+  const gradientIndex = Math.abs(playlist.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)) % PLAYLIST_GRADIENTS.length;
+  const background = PLAYLIST_GRADIENTS[gradientIndex];
 
   return (
     <div 
-      className="card" 
+      className="card fade-in" 
       style={styles.card}
       onClick={() => navigate(ROUTES.PLAYLIST.replace(':id', playlist.id))}
     >
       <div style={styles.imageContainer}>
-        {/* Mock visual setup for Playlist */}
-        <div style={styles.placeholderBg}>
+        <div style={{ ...styles.placeholderBg, background }}>
           <span style={styles.initial}>{playlist.name.charAt(0).toUpperCase()}</span>
         </div>
       </div>

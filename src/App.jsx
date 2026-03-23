@@ -11,6 +11,7 @@ import BottomNav from './components/BottomNav';
 import { ToastProvider } from './context/ToastContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { PlaylistProvider } from './context/PlaylistContext';
+import { WatchlistProvider } from './context/WatchlistContext';
 import './styles/global.css';
 
 function App() {
@@ -20,22 +21,24 @@ function App() {
         <ToastProvider>
           <AuthProvider>
             <PlaylistProvider>
-              <PlayerProvider>
-                <div className="app-container">
-                  <Sidebar />
-                  <main className="main-content">
-                    <Navbar />
-                    <div className="page-container">
-                      <AppRoutes />
-                    </div>
-                  </main>
-                  <MusicPlayer />
-                  <BottomNav />
-                </div>
-              </PlayerProvider>
+              <WatchlistProvider>
+                <PlayerProvider>
+                  <div className="app-container">
+                    <Sidebar />
+                    <main className="main-content">
+                      <Navbar />
+                      <div className="page-container">
+                        <AppRoutes />
+                      </div>
+                    </main>
+                    <MusicPlayer />
+                    <BottomNav />
+                  </div>
+                </PlayerProvider>
+              </WatchlistProvider>
             </PlaylistProvider>
           </AuthProvider>
-      </ToastProvider>
+        </ToastProvider>
       </ThemeProvider>
     </Router>
   );

@@ -9,4 +9,5 @@ export const ROUTES = {
   PLAYLIST: '/playlist/:id',
   FAVORITES: '/favorites',
   PROFILE: '/profile',
+  WATCHLIST: '/watchlist',
 };

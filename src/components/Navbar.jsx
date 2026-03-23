@@ -206,11 +206,11 @@ const Navbar = () => {
 const styles = {
   navbar: {
     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-    padding: '0 24px', backgroundColor: 'rgba(11, 17, 13, 0.75)', 
+    padding: '0 24px', backgroundColor: 'rgba(0, 0, 0, 0.7)', 
     position: 'fixed', top: 0, left: 'var(--navbar-left)', right: 0, 
     height: 'var(--navbar-height)', zIndex: 100,
-    backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
-    borderBottom: '1px solid var(--border-color)',
+    backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
+    borderBottom: 'none',
   },
   leftSection: { display: 'flex', alignItems: 'center', gap: '12px' },
   profileBadge: {

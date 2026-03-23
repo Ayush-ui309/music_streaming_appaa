@@ -12,6 +12,7 @@ import Playlist from '../pages/Playlist';
 import Favorites from '../pages/Favorites';
 import Profile from '../pages/Profile';
 import Premium from '../pages/Premium';
+import Watchlist from '../pages/Watchlist';
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
@@ -62,6 +63,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <Profile />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path={ROUTES.WATCHLIST} 
+        element={
+          <ProtectedRoute>
+            <Watchlist />
           </ProtectedRoute>
         } 
       />

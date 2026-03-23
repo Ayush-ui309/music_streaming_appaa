@@ -109,7 +109,7 @@ const AddToPlaylistButton = ({ track }) => {
           {loading ? (
             <div style={styles.center}><Loader size={18} style={{ animation: 'spin 1s linear infinite' }} /></div>
           ) : (
-            <div style={styles.list}>
+            <div className="scrollbar-custom" style={styles.list}>
               {playlists.length === 0 && !creating && <p style={styles.empty}>No playlists yet</p>}
               {playlists.map(pl => {
                 const added = addedIds.has(pl.id);
@@ -147,7 +147,7 @@ const styles = {
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px 8px 16px', borderBottom: '1px solid rgba(255,255,255,0.06)' },
   headerTitle: { fontSize: '13px', fontWeight: '700', color: 'var(--text-primary)', letterSpacing: '0.3px' },
   closeBtn: { background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '2px', display: 'flex' },
-  list: { maxHeight: '200px', overflowY: 'auto', padding: '4px 0' },
+  list: { maxHeight: '160px', overflowY: 'auto', padding: '4px 0', display: 'flex', flexDirection: 'column' },
   center: { display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '24px' },
   empty: { color: 'var(--text-secondary)', fontSize: '13px', textAlign: 'center', padding: '16px', margin: 0 },
   item: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', padding: '10px 16px', background: 'none', border: 'none', color: 'var(--text-primary)', fontSize: '14px', cursor: 'pointer', transition: 'background 0.15s', textAlign: 'left' },

@@ -1,9 +1,12 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { getTopTracks, getTrendingTracks, getRecentTracks, getPodcasts, getAudiobooks, getMockLiveEvents } from '../api/jamendoApi';
 import MusicCard from '../components/MusicCard';
 import PlaylistCard from '../components/PlaylistCard';
+import Footer from '../components/Footer';
 import Loader from '../components/Loader';
 import SearchBar from '../components/SearchBar';
+import HorizontalSection from '../components/HorizontalSection';
 import { HeroSkeleton, MusicCardSkeleton } from '../components/Skeleton';
 import { parseJamendoTrack } from '../utils/helpers';
 import { usePlayer } from '../hooks/usePlayer';
@@ -11,11 +14,13 @@ import { usePlaylists } from '../context/PlaylistContext';
 import { historyService } from '../services/historyService';
 import { recommendationService } from '../services/recommendationService';
 import { Sparkles, Clock, Globe } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 
 const PILLS = ['Music', 'Podcasts', 'Audiobooks', 'Live Events'];
 
 const Home = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tab = searchParams.get('tab');
+  
   const [data, setData] = useState({
     trending: [],
     recent: [],
@@ -26,20 +31,38 @@ const Home = () => {
   });
   const [loading, setLoading] = useState(true);
   const [contentLoading, setContentLoading] = useState(false);
-  const [activePill, setActivePill] = useState('Music');
+  const [activePill, setActivePill] = useState(tab || 'Music');
   const { playTrack, currentTrack, isPlaying } = usePlayer();
   const { playlists, loading: loadingPlaylists } = usePlaylists();
   const navigate = useNavigate();
+
+  // Sync activePill with URL param
+  useEffect(() => {
+    if (tab && PILLS.includes(tab)) {
+      setActivePill(tab);
+    } else if (!tab) {
+      setActivePill('Music');
+    }
+  }, [tab]);
+
+  const handlePillClick = (pill) => {
+    setActivePill(pill);
+    if (pill === 'Music') {
+      setSearchParams({});
+    } else {
+      setSearchParams({ tab: pill });
+    }
+  };
 
   const fetchHomeData = useCallback(async () => {
     setLoading(true);
     try {
       const [trendingRaw, recentRaw, topRaw, persData, historyData] = await Promise.all([
-        getTrendingTracks(10),
-        getRecentTracks(10),
-        getTopTracks(20),
-        recommendationService.getRecommendations(8),
-        historyService.getHistory(6)
+        getTrendingTracks(30),
+        getRecentTracks(30),
+        getTopTracks(30),
+        recommendationService.getRecommendations(20),
+        historyService.getHistory(10)
       ]);
 
       setData({
@@ -107,7 +130,7 @@ const Home = () => {
           <button 
             key={pill} 
             className={`pill ${activePill === pill ? 'active' : ''}`}
-            onClick={() => setActivePill(pill)}
+            onClick={() => handlePillClick(pill)}
           >
             {pill}
           </button>
@@ -116,88 +139,85 @@ const Home = () => {
 
       {activePill === 'Music' ? (
         <>
-          {/* Hero / For You */}
-          {loading ? (
-            <HeroSkeleton />
-          ) : heroTrack ? (
-            <div style={styles.heroCard} className="card" onClick={() => playTrack(heroTrack, data.recommended)}>
-              <div style={styles.heroOverlay}></div>
-              <img src={heroTrack.image || 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17'} alt="focus" style={styles.heroImg} />
-              <div style={styles.heroContent}>
-                <span style={styles.tag}>NEW RELEASE</span>
-                <h3 style={styles.heroTitle}>{heroTrack.title}</h3>
-                <p style={styles.heroSubtitle}>By {heroTrack.artist}</p>
-                <button className="btn-primary" style={{ marginTop: '16px', padding: '10px 24px' }}>Play Now</button>
-              </div>
-            </div>
-          ) : null}
+          <div style={{ marginTop: '16px' }}>
+            {/* Trending - Match Spotify screenshot top row */}
+            <HorizontalSection title="Trending songs" onShowAll={() => navigate('/trending')}>
+              {loading ? (
+                Array(6).fill(0).map((_, i) => <MusicCardSkeleton key={i} />)
+              ) : (
+                data.trending.map(track => (
+                  <MusicCard key={`trending-${track.id}`} track={track} onPlay={() => playTrack(track, data.trending)} />
+                ))
+              )}
+            </HorizontalSection>
 
-          {/* Recently Played */}
-          {data.history.length > 0 && (
-            <>
-              <div style={styles.sectionHeader}>
-                <h2 className="title-md" style={{ marginTop: '40px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                   <Clock size={20} color="var(--primary-color)" /> Recently Played
-                </h2>
-              </div>
-              <div className="grid-system">
+            {/* Popular Artists - Using trending track unique artists as mock */}
+            <HorizontalSection title="Popular artists" onShowAll={() => navigate('/search')}>
+              {loading ? (
+                Array(6).fill(0).map((_, i) => <MusicCardSkeleton key={i} />)
+              ) : (
+                data.trending.filter((v, i, a) => a.findIndex(t => t.artist === v.artist) === i).slice(0, 6).map(track => (
+                  <MusicCard key={`artist-${track.id}`} track={track} variant="artist" />
+                ))
+              )}
+            </HorizontalSection>
+
+            {/* Recommended Hits */}
+            <HorizontalSection title="Recommended For You">
+              {loading ? (
+                Array(6).fill(0).map((_, i) => <MusicCardSkeleton key={i} />)
+              ) : data.personalized.length > 0 ? (
+                data.personalized.map(track => (
+                  <MusicCard key={`recommended-${track.id}`} track={track} onPlay={() => playTrack(track, data.personalized)} />
+                ))
+              ) : (
+                data.recommended.slice(0, 20).map(track => (
+                  <MusicCard key={`hits-${track.id}`} track={track} onPlay={() => playTrack(track, data.recommended.slice(0, 20))} />
+                ))
+              )}
+            </HorizontalSection>
+
+            {/* Recently Played */}
+            {data.history.length > 0 && (
+              <HorizontalSection title="Recently Played" onShowAll={() => navigate('/library')}>
                 {data.history.map(track => (
                   <MusicCard key={`history-${track.id}`} track={track} onPlay={() => playTrack(track, data.history)} />
                 ))}
-              </div>
-            </>
-          )}
-
-          {/* RecommendedHits / Hits */}
-          <div style={styles.sectionHeader}>
-            <h2 className="title-md" style={{ marginTop: '40px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Sparkles size={20} color="var(--primary-color)" /> Recommended For You
-            </h2>
-          </div>
-          <div className="grid-system">
-            {loading ? (
-              Array(6).fill(0).map((_, i) => <MusicCardSkeleton key={i} />)
-            ) : data.personalized.length > 0 ? (
-              data.personalized.map(track => (
-                <MusicCard key={`recommended-${track.id}`} track={track} onPlay={() => playTrack(track, data.personalized)} />
-              ))
-            ) : (
-              data.recommended.slice(1, 7).map(track => (
-                <MusicCard key={`hits-${track.id}`} track={track} onPlay={() => playTrack(track, data.recommended.slice(1, 7))} />
-              ))
+              </HorizontalSection>
             )}
-          </div>
 
-          {/* Trending */}
-          <div style={styles.sectionHeader}>
-            <h2 className="title-md" style={{ marginTop: '40px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Globe size={20} color="var(--primary-color)" /> Trending Tracks
-            </h2>
-          </div>
-          <div className="grid-system">
-            {loading ? (
-              Array(6).fill(0).map((_, i) => <MusicCardSkeleton key={i} />)
-            ) : (
-              data.trending.map(track => (
-                <MusicCard key={`trending-${track.id}`} track={track} onPlay={() => playTrack(track, data.trending)} />
-              ))
-            )}
-          </div>
-
-          {/* Your Playlists Section */}
-          {playlists.length > 0 && (
-            <section style={styles.section}>
-              <div style={styles.sectionHeader}>
-                <h2 className="title-md" style={{ marginTop: '40px', display: 'flex', alignItems: 'center', gap: '8px' }}>Your Playlists</h2>
-                <button style={styles.showAll} onClick={() => navigate('/library')}>See All</button>
-              </div>
-              <div className="grid-system">
+            {/* Your Playlists Section */}
+            {playlists.length > 0 && (
+              <HorizontalSection title="Your Playlists" onShowAll={() => navigate('/library')}>
                 {playlists.map(playlist => (
                   <PlaylistCard key={playlist.id} playlist={playlist} />
                 ))}
-              </div>
-            </section>
-          )}
+              </HorizontalSection>
+            )}
+
+            {/* Popular Albums & Singles (Mocked) */}
+            <HorizontalSection title="Popular Albums & Singles" onShowAll={() => navigate('/search')}>
+              {data.recommended.slice(5, 25).map(track => (
+                <MusicCard key={`albums-${track.id}`} track={track} onPlay={() => playTrack(track)} />
+              ))}
+            </HorizontalSection>
+
+            {/* Popular Radio (Mocked) */}
+            <HorizontalSection title="Popular Radio" onShowAll={() => navigate('/search')}>
+              {data.trending.slice(4, 24).map(track => (
+                <MusicCard key={`radio-${track.id}`} track={track} onPlay={() => playTrack(track)} />
+              ))}
+            </HorizontalSection>
+
+            {/* Featured Charts (Mocked) */}
+            <HorizontalSection title="Featured Charts" onShowAll={() => navigate('/search')}>
+              {data.recommended.slice(12, 28).map(track => (
+                <MusicCard key={`charts-${track.id}`} track={track} onPlay={() => playTrack(track)} />
+              ))}
+            </HorizontalSection>
+
+            <Footer />
+          </div>
         </>
       ) : (
         <div style={{ marginTop: '16px' }}>
@@ -241,13 +261,13 @@ const styles = {
   homeContainer: { display: 'flex', flexDirection: 'column', maxWidth: '1200px', margin: '0 auto', paddingBottom: '40px' },
   sectionHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', marginTop: '16px' },
   showAll: { color: 'var(--primary-color)', fontWeight: '600', fontSize: '14px', cursor: 'pointer' },
-  heroCard: { position: 'relative', height: '320px', borderRadius: '24px', overflow: 'hidden', padding: 0, border: 'none', cursor: 'pointer', boxShadow: '0 20px 40px rgba(0,0,0,0.4)' },
+  heroCard: { position: 'relative', height: '240px', borderRadius: '12px', overflow: 'hidden', padding: 0, border: 'none', cursor: 'pointer', boxShadow: '0 12px 32px rgba(0,0,0,0.5)' },
   heroImg: { width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0, zIndex: 1 },
-  heroOverlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'linear-gradient(to right, rgba(15, 23, 20, 0.95) 20%, rgba(15, 23, 20, 0.4) 100%)', zIndex: 2 },
-  heroContent: { position: 'absolute', top: '50%', left: '48px', transform: 'translateY(-50%)', zIndex: 3, maxWidth: '500px' },
-  tag: { backgroundColor: 'rgba(77, 244, 120, 0.2)', color: 'var(--primary-color)', padding: '4px 10px', borderRadius: '6px', fontSize: '11px', fontWeight: '800', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '16px', display: 'inline-block' },
-  heroTitle: { fontSize: '48px', fontWeight: '900', margin: '0 0 8px 0', letterSpacing: '-1.5px', lineHeight: 1.1 },
-  heroSubtitle: { color: 'var(--text-secondary)', fontSize: '18px', fontWeight: '500' },
+  heroOverlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'linear-gradient(to right, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.2) 100%)', zIndex: 2 },
+  heroContent: { position: 'absolute', top: '50%', left: '32px', transform: 'translateY(-50%)', zIndex: 3, maxWidth: '400px' },
+  tag: { backgroundColor: 'var(--primary-color)', color: '#000', padding: '2px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: '800', letterSpacing: '0.5px', textTransform: 'uppercase', marginBottom: '12px', display: 'inline-block' },
+  heroTitle: { fontSize: '32px', fontWeight: '900', margin: '0 0 4px 0', letterSpacing: '-1px', lineHeight: 1.1 },
+  heroSubtitle: { color: 'var(--text-secondary)', fontSize: '15px', fontWeight: '500' },
   eventCard: { padding: 0, overflow: 'hidden' },
   eventImg: { width: '100%', aspectRatio: '16/9', objectFit: 'cover' },
   emptyState: { textAlign: 'center', padding: '64px', color: 'var(--text-secondary)' },

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Maximize2, Shuffle, Repeat, Repeat1, ListMusic } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Maximize2, Shuffle, Repeat, Repeat1, ListMusic, X } from 'lucide-react';
 import { usePlayer } from '../hooks/usePlayer';
 import { formatTime } from '../utils/formatTime';
 
@@ -14,8 +14,14 @@ const MusicPlayer = () => {
   const [isMuted, setIsMuted] = useState(false);
   const [prevVolume, setPrevVolume] = useState(0.8);
   const [showQueue, setShowQueue] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
 
-  if (!currentTrack) return null;
+  // Re-show player when track changes
+  useEffect(() => {
+    if (currentTrack) setIsVisible(true);
+  }, [currentTrack]);
+
+  if (!currentTrack || !isVisible) return null;
 
   const handleSeek = (e) => {
     seek(parseFloat(e.target.value));
@@ -44,6 +50,13 @@ const MusicPlayer = () => {
   return (
     <div className="player-wrapper" style={styles.playerWrapper}>
       <div className="player-container" style={styles.playerContainer}>
+        <button 
+          style={styles.closeBtn} 
+          onClick={() => setIsVisible(false)}
+          title="Dismiss Player"
+        >
+          <X size={16} />
+        </button>
         {/* Track Info */}
         <div style={styles.trackInfoContainer}>
           <img src={currentTrack.image || 'https://via.placeholder.com/60'} alt="cover" style={styles.coverImage} />
@@ -153,7 +166,26 @@ const MusicPlayer = () => {
 
 const styles = {
   playerWrapper: { position: 'fixed', bottom: '24px', left: '24px', right: '24px', display: 'flex', justifyContent: 'center', zIndex: 1000, pointerEvents: 'none' },
-  playerContainer: { backgroundColor: '#111822', border: '1px solid rgba(255, 255, 255, 0.05)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 24px', borderRadius: '16px', boxShadow: '0 20px 40px rgba(0,0,0,0.6)', width: '100%', maxWidth: '1200px', pointerEvents: 'auto', backdropFilter: 'blur(10px)' },
+  playerContainer: { position: 'relative', backgroundColor: '#111822', border: '1px solid rgba(255, 255, 255, 0.05)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 24px', borderRadius: '16px', boxShadow: '0 20px 40px rgba(0,0,0,0.6)', width: '100%', maxWidth: '1200px', pointerEvents: 'auto', backdropFilter: 'blur(10px)' },
+  closeBtn: {
+    position: 'absolute',
+    top: '-10px',
+    right: '-10px',
+    width: '24px',
+    height: '24px',
+    borderRadius: '50%',
+    backgroundColor: '#333',
+    color: '#fff',
+    border: 'none',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    cursor: 'pointer',
+    zIndex: 1001,
+    boxShadow: '0 4px 8px rgba(0,0,0,0.5)',
+    transition: 'transform 0.2s',
+    '&:hover': { transform: 'scale(1.1)' }
+  },
   trackInfoContainer: { display: 'flex', alignItems: 'center', width: '30%', minWidth: '200px' },
   coverImage: { width: '48px', height: '48px', borderRadius: '8px', marginRight: '16px', objectFit: 'cover', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' },
   textInfo: { display: 'flex', flexDirection: 'column', overflow: 'hidden' },

@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { searchTracks, getTopTracks, getTracksByTag } from '../api/jamendoApi';
 import MusicCard from '../components/MusicCard';
+import HorizontalSection from '../components/HorizontalSection';
 import { MusicCardSkeleton } from '../components/Skeleton';
 import SearchBar from '../components/SearchBar';
 import { parseJamendoTrack } from '../utils/helpers';
@@ -98,11 +99,11 @@ const Search = () => {
           {Array(8).fill(0).map((_, i) => <MusicCardSkeleton key={i} />)}
         </div>
       ) : tracks.length > 0 ? (
-        <div className="grid-system">
+        <HorizontalSection title={query ? `Results for "${query}"` : activeGenre.label === 'All' ? 'Recommended for You' : `${activeGenre.label} Music`}>
           {tracks.map(track => (
             <MusicCard key={track.id} track={track} onPlay={() => playTrack(track, tracks)} />
           ))}
-        </div>
+        </HorizontalSection>
       ) : (
         <div style={styles.emptyState}>
           <p style={{ fontSize: '48px' }}>🎵</p>
